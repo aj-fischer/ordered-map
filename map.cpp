@@ -26,7 +26,30 @@ Map::Map(const Map &v){
 		copyCode(_root->left, v._root->left);
 		_size = v._size;
 	}
-} 
+}
+
+
+Iterator Map::begin() {
+	if (_root->left == _root) {
+		return;
+	}
+
+	return Iterator(_root->left);
+}
+
+
+Iterator Map::end() {
+	if (_root->left == _root) {
+		return;
+	}
+	
+	_cur = _root->left;
+	while (_cur->right != nullptr) {
+		_cur = _cur->right;
+	}
+	return Iterator(_cur);
+}
+
 
 // common copy code for deep copy a tree
 void  Map::copyCode(Elem* &newRoot, Elem* origRoot){
