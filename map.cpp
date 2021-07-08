@@ -29,11 +29,30 @@ Map::Map(const Map &v){
 }
 
 
+Iterator Map::find(KEY_TYPE key) {
+	_cur = _root->left;
+
+	if (_cur == _root) {
+		return;
+	}
+
+	while (_cur) {
+		if (_cur->key > key) {
+			_cur = _cur->left;
+		} else if (_cur->key < key) {
+			_cur = _cur->right;
+		} else {
+			break;
+		}
+	}
+	return Iterator(_cur);
+}
+
+
 Iterator Map::begin() {
 	if (_root->left == _root) {
 		return;
 	}
-
 	return Iterator(_root->left);
 }
 
@@ -42,7 +61,7 @@ Iterator Map::end() {
 	if (_root->left == _root) {
 		return;
 	}
-	
+
 	_cur = _root->left;
 	while (_cur->right != nullptr) {
 		_cur = _cur->right;
