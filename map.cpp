@@ -36,16 +36,16 @@ Iterator Map::find(KEY_TYPE key) {
 		return;
 	}
 
-	while (_cur) {
+	while (_cur->key != key) {
 		if (_cur->key > key) {
 			_cur = _cur->left;
 		} else if (_cur->key < key) {
 			_cur = _cur->right;
 		} else {
-			return Iterator(_cur);
+			return end();
 		}
 	}
-	return end();
+	return Iterator(_cur);
 }
 
 
