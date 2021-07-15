@@ -42,10 +42,10 @@ Iterator Map::find(KEY_TYPE key) {
 		} else if (_cur->key < key) {
 			_cur = _cur->right;
 		} else {
-			break;
+			return Iterator(_cur);
 		}
 	}
-	return Iterator(_cur);
+	return end();
 }
 
 
