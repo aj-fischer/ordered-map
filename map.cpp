@@ -29,13 +29,52 @@ Map::Map(const Map &v){
 }
 
 
-Iterator Map::find(KEY_TYPE key) {
+bool Map::insert(KEY_TYPE key, VALUE_TYPE val) {
+	if (_root->left == _root) {
+		Elem* nodeToInsert = new Elem(key, val);
+		_root->left = nodeToInsert;
+		_size++;
+		return true;
+	}
+	
 	_cur = _root->left;
 
-	if (_cur == _root) {
+	if (find(key) != end()) {
+		return false;
+	} else {
+		Elem* nodeToInsert = new Elem(key, val);
+		while (true) {
+			if (key < _cur->key) {
+				if (!_cur->left) {
+					_cur->left = nodeToInsert;
+					_size++;
+					return true;
+				}
+				_cur = _cur->left;
+			} else {
+				if (!_cur->right) {
+					_cur->right = nodeToInsert;
+					_size++;
+					return true;
+				}
+				_cur = _cur->right;
+			}
+		}
+	}
+}
+
+
+int Map::size() {
+	return _size;
+}
+
+
+Iterator Map::find(KEY_TYPE key) {
+	if (_size == 0) {
 		return;
 	}
 
+	_cur = _root->left;
 	while (_cur->key != key) {
 		if (_cur->key > key) {
 			_cur = _cur->left;
@@ -50,19 +89,19 @@ Iterator Map::find(KEY_TYPE key) {
 
 
 Iterator Map::begin() {
-	if (_root->left == _root) {
+	if (_size == 0) {
 		return;
 	}
+	
 	return Iterator(_root->left);
 }
 
 
 Iterator Map::end() {
-	if (_root->left == _root) {
+	if (_size == 0) {
 		return;
 	}
 
-	_cur = _root->left;
 	while (_cur->right != nullptr) {
 		_cur = _cur->right;
 	}
