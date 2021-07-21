@@ -28,86 +28,90 @@ Map::Map(const Map &v){
 	}
 }
 
-
 bool Map::insert(KEY_TYPE key, VALUE_TYPE val) {
 	if (_root->left == _root) {
-		Elem* nodeToInsert = new Elem(key, val);
+		Elem* nodeToInsert = new Elem;
+		nodeToInsert->key = key;
+		nodeToInsert->data = val;
 		_root->left = nodeToInsert;
 		_size++;
 		return true;
 	}
 	
-	_cur = _root->left;
+	Elem* parent = _root->left;
 
 	if (find(key) != end()) {
 		return false;
 	} else {
-		Elem* nodeToInsert = new Elem(key, val);
+		Elem* nodeToInsert = new Elem;
+		nodeToInsert->key = key;
+		nodeToInsert->data = val;
 		while (true) {
-			if (key < _cur->key) {
-				if (!_cur->left) {
-					_cur->left = nodeToInsert;
+			if (key < parent->key) {
+				if (!parent->left) {
+					parent->left = nodeToInsert;
 					_size++;
 					return true;
 				}
-				_cur = _cur->left;
+				parent = parent->left;
 			} else {
-				if (!_cur->right) {
-					_cur->right = nodeToInsert;
+				if (!parent->right) {
+					parent->right = nodeToInsert;
 					_size++;
 					return true;
 				}
-				_cur = _cur->right;
+				parent = parent->right;
 			}
 		}
 	}
 }
 
 
-int Map::size() {
+int Map::size() const{
 	return _size;
 }
 
 
-Iterator Map::find(KEY_TYPE key) {
+Map::Iterator Map::find(KEY_TYPE key) const{
 	if (_size == 0) {
-		return;
+		return Iterator();
 	}
 
-	_cur = _root->left;
-	while (_cur->key != key) {
-		if (_cur->key > key) {
-			_cur = _cur->left;
-		} else if (_cur->key < key) {
-			_cur = _cur->right;
+	Elem* parent = _root->left;
+	while (parent->key != key) {
+		if (parent->key > key) {
+			parent = parent->left;
+		} else if (parent->key < key) {
+			parent = parent->right;
 		} else {
 			return end();
 		}
 	}
-	return Iterator(_cur);
+	return Iterator(parent);
 }
 
 
-Iterator Map::begin() {
+Map::Iterator Map::begin() const{
 	if (_size == 0) {
-		return;
+		return Iterator();
 	}
 	
 	return Iterator(_root->left);
 }
 
 
-Iterator Map::end() {
+Map::Iterator Map::end() const{
 	if (_size == 0) {
-		return;
+		return Iterator();
 	}
 
-	while (_cur->right != nullptr) {
-		_cur = _cur->right;
+	Elem* parent = _root->left;
+
+	while (parent->right != nullptr) {
+		parent = parent->right;
 	}
-	return Iterator(_cur);
+	return Iterator(parent);
 }
-
 
 // common copy code for deep copy a tree
 void  Map::copyCode(Elem* &newRoot, Elem* origRoot){
