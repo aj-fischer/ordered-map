@@ -76,22 +76,26 @@ bool Map::erase(KEY_TYPE key) {
 	if (size() == 1) {
 		delete *it;
 		_root->left = _root;
+		_size--;
 		return true;
 	}
 	if (!it->left && !it->right) {	// if no children
 		delete *it;
+		_size--;
 		return true;
 	}
 	if (!it->left) {
 		Elem* tempNode = *it;
 		tempNode = tempNode->right;
 		delete *it;
+		_size--;
 		return true;
 	}
 	if (!it->right) {
 		Elem* tempNode = *it;
 		tempNode = tempNode->left;
 		delete *it;
+		_size--;
 		return true;
 	}
 	Elem* tempNode = *it;
@@ -102,6 +106,7 @@ bool Map::erase(KEY_TYPE key) {
 	*it->key = tempNode->key;
 	*it->data = tempNode->data;
 	delete tempNode;
+	_size--;
 	return true;
 }
 
@@ -153,6 +158,16 @@ Map::Iterator Map::end() const{
 }
 
 
+VALUE_TYPE& Map::operator[](KEY_TYPE key) {
+	if (find(key) == end()) {
+		insert(key, "");
+		return "";
+	}
+	Iterator it = find(key);
+	return *it->data;
+}
+
+
 Elem& Map::Iterator::operator*() {
 	return *_cur;
 }
@@ -168,6 +183,19 @@ bool Map::Iterator::operator==(Iterator it) const {
 		return true;
 	}
 	return false;
+}
+
+
+bool Map::Iterator::operator!=(Iterator it) const {
+	if (_cur != *it) {
+		return true;
+	}
+	return false;
+}
+
+
+void Map::destructCode(Elem *& root) {
+
 }
 
 
