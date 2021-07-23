@@ -67,6 +67,45 @@ bool Map::insert(KEY_TYPE key, VALUE_TYPE val) {
 }
 
 
+bool Map::erase(KEY_TYPE key) {
+	Iterator it = find(key);
+
+	if (it == end()) {
+		return false;
+	}
+	if (size() == 1) {
+		delete *it;
+		_root->left = _root;
+		return true;
+	}
+	if (!it->left && !it->right) {	// if no children
+		delete *it;
+		return true;
+	}
+	if (!it->left) {
+		Elem* tempNode = *it;
+		tempNode = tempNode->right;
+		delete *it;
+		return true;
+	}
+	if (!it->right) {
+		Elem* tempNode = *it;
+		tempNode = tempNode->left;
+		delete *it;
+		return true;
+	}
+	Elem* tempNode = *it;
+	tempNode = tempNode->right;
+	while (tempNode->left != nullptr) {
+		tempNode = tempNode->left;
+	}
+	*it->key = tempNode->key;
+	*it->data = tempNode->data;
+	delete tempNode;
+	return true;
+}
+
+
 int Map::size() const{
 	return _size;
 }
@@ -112,6 +151,25 @@ Map::Iterator Map::end() const{
 	}
 	return Iterator(parent);
 }
+
+
+Elem& Map::Iterator::operator*() {
+	return *_cur;
+}
+
+
+Elem* Map::Iterator::operator->() {
+	return &_cur;
+}
+
+
+bool Map::Iterator::operator==(Iterator it) const {
+	if (_cur == *it) {
+		return true;
+	}
+	return false;
+}
+
 
 // common copy code for deep copy a tree
 void  Map::copyCode(Elem* &newRoot, Elem* origRoot){
