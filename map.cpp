@@ -195,7 +195,12 @@ bool Map::Iterator::operator!=(Iterator it) const {
 
 
 void Map::destructCode(Elem *& root) {
-
+	if ((!root->left && !root->right) || (size() == 0)) {
+		delete root;
+	} else {
+		destructCode(tempRoot->left);
+		destructCode(tempRoot->right);
+	}
 }
 
 
