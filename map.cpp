@@ -28,6 +28,26 @@ Map::Map(const Map &v){
 	}
 }
 
+// destructor
+Map::~Map() {
+	destructCode(_root);
+	delete _root;
+}
+
+// assignment
+Map& Map::operator=(const Map &rhs) {
+	if (this == &rhs) {
+		return *this;
+	}
+	destructCode(_root);
+	_size = rhs.size();
+	if (_size == 0) {
+		copyCode(_root, rhs._root);
+	}
+	return *this;
+}
+
+
 bool Map::insert(KEY_TYPE key, VALUE_TYPE val) {
 	if (_root->left == _root) {
 		Elem* nodeToInsert = new Elem;
@@ -194,8 +214,13 @@ bool Map::Iterator::operator!=(Iterator it) const {
 }
 
 
+bool Map::insert(Elem *& root, const KEY_TYPE& key, const VALUE_TYPE& data) {
+	
+}
+
+
 void Map::destructCode(Elem *& root) {
-	if ((!root->left && !root->right) || (size() == 0)) {
+	if ((!root->left && !root->right) {
 		delete root;
 	} else {
 		destructCode(tempRoot->left);
