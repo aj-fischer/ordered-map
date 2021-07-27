@@ -31,7 +31,6 @@ Map::Map(const Map &v){
 // destructor
 Map::~Map() {
 	destructCode(_root);
-	delete _root;
 }
 
 // assignment
@@ -48,83 +47,56 @@ Map& Map::operator=(const Map &rhs) {
 }
 
 
-bool Map::insert(KEY_TYPE key, VALUE_TYPE val) {
-	if (_root->left == _root) {
+bool Map::insert(KEY_TYPE key, VALUE_TYPE data) {
+	if (size() == 0) {
 		Elem* nodeToInsert = new Elem;
 		nodeToInsert->key = key;
-		nodeToInsert->data = val;
+		nodeToInsert->data = data;
 		_root->left = nodeToInsert;
 		_size++;
 		return true;
 	}
-	
-	Elem* parent = _root->left;
-
-	if (find(key) != end()) {
-		return false;
-	} else {
-		Elem* nodeToInsert = new Elem;
-		nodeToInsert->key = key;
-		nodeToInsert->data = val;
-		while (true) {
-			if (key < parent->key) {
-				if (!parent->left) {
-					parent->left = nodeToInsert;
-					_size++;
-					return true;
-				}
-				parent = parent->left;
-			} else {
-				if (!parent->right) {
-					parent->right = nodeToInsert;
-					_size++;
-					return true;
-				}
-				parent = parent->right;
-			}
-		}
-	}
+	return insert(_root->left, key, data);
 }
 
 
 bool Map::erase(KEY_TYPE key) {
 	Iterator it = find(key);
 
-	if (it == end()) {
-		return false;
-	}
-	if (size() == 1) {
-		delete *it;
-		_root->left = _root;
+	if ((it == end()) && (it->key == key)) {
+		delete &*it;
 		_size--;
 		return true;
 	}
+	if (it == end()) {
+		return false;
+	}
 	if (!it->left && !it->right) {	// if no children
-		delete *it;
+		delete &*it;
 		_size--;
 		return true;
 	}
 	if (!it->left) {
-		Elem* tempNode = *it;
+		Elem* tempNode = &*it;
 		tempNode = tempNode->right;
-		delete *it;
+		delete &*it;
 		_size--;
 		return true;
 	}
 	if (!it->right) {
-		Elem* tempNode = *it;
+		Elem* tempNode = &*it;
 		tempNode = tempNode->left;
-		delete *it;
+		delete &*it;
 		_size--;
 		return true;
 	}
-	Elem* tempNode = *it;
+	Elem* tempNode = &*it;
 	tempNode = tempNode->right;
 	while (tempNode->left != nullptr) {
 		tempNode = tempNode->left;
 	}
-	*it->key = tempNode->key;
-	*it->data = tempNode->data;
+	it->key = tempNode->key;
+	it->data = tempNode->data;
 	delete tempNode;
 	_size--;
 	return true;
@@ -141,17 +113,24 @@ Map::Iterator Map::find(KEY_TYPE key) const{
 		return Iterator();
 	}
 
-	Elem* parent = _root->left;
-	while (parent->key != key) {
-		if (parent->key > key) {
-			parent = parent->left;
-		} else if (parent->key < key) {
-			parent = parent->right;
+	Elem* root = _root->left;
+
+	while (root->key != key) {
+		if ((root->key > key) && (root->left)) {
+			if (root->left->key < key) {
+				return end();
+			}
+			root = root->left;
+		} else if ((root->key < key) && (root->right)) {
+			if (root->right->key > key) {
+				return end();
+			}
+			root = root->right;
 		} else {
 			return end();
 		}
 	}
-	return Iterator(parent);
+	return Iterator(root);
 }
 
 
@@ -169,37 +148,39 @@ Map::Iterator Map::end() const{
 		return Iterator();
 	}
 
-	Elem* parent = _root->left;
+	Elem* root = _root->left;
 
-	while (parent->right != nullptr) {
-		parent = parent->right;
+	while (root->right != nullptr) {
+		root = root->right;
 	}
-	return Iterator(parent);
+	return Iterator(root);
 }
 
 
 VALUE_TYPE& Map::operator[](KEY_TYPE key) {
 	if (find(key) == end()) {
-		insert(key, "");
-		return "";
+		string str = "";
+		insert(key, str);
+		Iterator it = find(key);
+		return it->data;
 	}
 	Iterator it = find(key);
-	return *it->data;
+	return it->data;
 }
 
 
-Elem& Map::Iterator::operator*() {
+Map::Elem& Map::Iterator::operator*() {
 	return *_cur;
 }
 
 
-Elem* Map::Iterator::operator->() {
-	return &_cur;
+Map::Elem* Map::Iterator::operator->() {
+	return _cur;
 }
 
 
 bool Map::Iterator::operator==(Iterator it) const {
-	if (_cur == *it) {
+	if ((_cur->key == it->key) && (_cur->data == it->data)) {
 		return true;
 	}
 	return false;
@@ -207,7 +188,7 @@ bool Map::Iterator::operator==(Iterator it) const {
 
 
 bool Map::Iterator::operator!=(Iterator it) const {
-	if (_cur != *it) {
+	if ((_cur->key != it->key) && (_cur->data != it->data)) {
 		return true;
 	}
 	return false;
@@ -215,16 +196,50 @@ bool Map::Iterator::operator!=(Iterator it) const {
 
 
 bool Map::insert(Elem *& root, const KEY_TYPE& key, const VALUE_TYPE& data) {
-	
+	if (key == root->key) {
+		return false;
+	}
+
+	if ((key < root->key) && (!root->left)) {
+		Elem* nodeToInsert = new Elem;
+		nodeToInsert->key = key;
+		nodeToInsert->data = data;
+		root->left = nodeToInsert;
+		_size++;
+		return true;
+	}
+	if ((key < root->key) && (root->left)) {
+		insert(root->left, key, data);
+	}
+
+	if ((key > root->key) && (!root->right)) {
+		Elem* nodeToInsert = new Elem;
+		nodeToInsert->key = key;
+		nodeToInsert->data = data;
+		root->right = nodeToInsert;
+		_size++;
+		return true;
+	}
+	if ((key > root->key) && (root->right)) {
+		insert(root->right, key, data);
+	}
+	return false;
 }
 
 
 void Map::destructCode(Elem *& root) {
-	if ((!root->left && !root->right) {
+	if (size() == 0) {
 		delete root;
 	} else {
-		destructCode(tempRoot->left);
-		destructCode(tempRoot->right);
+		Elem* tempRoot = root;
+		delete root;
+		_size--;
+		if (tempRoot->left) {
+			destructCode(tempRoot->left);
+		}
+		if (tempRoot->right) {
+			destructCode(tempRoot->right);
+		}
 	}
 }
 
