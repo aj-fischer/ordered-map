@@ -30,7 +30,11 @@ Map::Map(const Map &v){
 
 // destructor
 Map::~Map() {
-	destructCode(_root);
+	if (size() == 0) {
+		delete _root;
+	} else {
+		destructCode(_root);
+	}
 }
 
 // assignment
@@ -61,45 +65,55 @@ bool Map::insert(KEY_TYPE key, VALUE_TYPE data) {
 
 
 bool Map::erase(KEY_TYPE key) {
-	Iterator it = find(key);
-
-	if ((it == end()) && (it->key == key)) {
-		delete &*it;
-		_size--;
-		return true;
-	}
-	if (it == end()) {
+	if (size() == 0) {
 		return false;
 	}
-	if (!it->left && !it->right) {	// if no children
-		delete &*it;
-		_size--;
-		return true;
+
+	Elem* root = _root->left;
+
+	while (root) {
+		if (key == root->key) {
+			if (!root->left && !root->right) {
+				delete root;
+				_size--;
+				return true;
+			}
+			if (root->left && root->right) {
+				Elem* inorderSuccessor = root->right;
+				while (inorderSuccessor->left) {
+					inorderSuccessor = inorderSuccessor->left;
+				}
+				root->key = inorderSuccessor->key;
+				root->data = inorderSuccessor->data;
+				delete inorderSuccessor;
+				_size--;
+				return true;
+			}
+			if (root->left) {
+				Elem* childNode = root->left;
+				root->key = childNode->key;
+				root->data = childNode->data;
+				delete childNode;
+				_size--;
+				return true;
+			}
+			// If only a right child.
+			Elem* childNode = root->right;
+			root->key = childNode->key;
+			root->data = childNode->data;
+			delete childNode;
+			_size--;
+			return true;
+		}
+		if (key < root->key) {
+			root = root->left;
+		} else if (key > root->key) {
+			root = root->right;
+		} else {
+			break;
+		}
 	}
-	if (!it->left) {
-		Elem* tempNode = &*it;
-		tempNode = tempNode->right;
-		delete &*it;
-		_size--;
-		return true;
-	}
-	if (!it->right) {
-		Elem* tempNode = &*it;
-		tempNode = tempNode->left;
-		delete &*it;
-		_size--;
-		return true;
-	}
-	Elem* tempNode = &*it;
-	tempNode = tempNode->right;
-	while (tempNode->left != nullptr) {
-		tempNode = tempNode->left;
-	}
-	it->key = tempNode->key;
-	it->data = tempNode->data;
-	delete tempNode;
-	_size--;
-	return true;
+	return false;
 }
 
 
@@ -109,25 +123,19 @@ int Map::size() const{
 
 
 Map::Iterator Map::find(KEY_TYPE key) const{
-	if (_size == 0) {
-		return Iterator();
+	if (size() == 0) {
+		return end();
 	}
 
 	Elem* root = _root->left;
 
-	while (root->key != key) {
-		if ((root->key > key) && (root->left)) {
-			if (root->left->key < key) {
-				return end();
-			}
+	while (root) {
+		if (key < root->key) {
 			root = root->left;
-		} else if ((root->key < key) && (root->right)) {
-			if (root->right->key > key) {
-				return end();
-			}
+		} else if (key > root->key) {
 			root = root->right;
 		} else {
-			return end();
+			break;
 		}
 	}
 	return Iterator(root);
@@ -149,8 +157,8 @@ Map::Iterator Map::end() const{
 	}
 
 	Elem* root = _root->left;
-
-	while (root->right != nullptr) {
+	
+	while (root->right) {
 		root = root->right;
 	}
 	return Iterator(root);
@@ -158,13 +166,13 @@ Map::Iterator Map::end() const{
 
 
 VALUE_TYPE& Map::operator[](KEY_TYPE key) {
-	if (find(key) == end()) {
-		string str = "";
-		insert(key, str);
-		Iterator it = find(key);
-		return it->data;
-	}
 	Iterator it = find(key);
+	if (((it == end()) && it->key != key) || !&*it) {
+		string str = "";
+		insert(_root->left, key, str);
+		Iterator newIt = find(key);
+		return newIt->data;
+	}
 	return it->data;
 }
 
@@ -180,7 +188,7 @@ Map::Elem* Map::Iterator::operator->() {
 
 
 bool Map::Iterator::operator==(Iterator it) const {
-	if ((_cur->key == it->key) && (_cur->data == it->data)) {
+	if (_cur == &*it) {
 		return true;
 	}
 	return false;
@@ -188,7 +196,7 @@ bool Map::Iterator::operator==(Iterator it) const {
 
 
 bool Map::Iterator::operator!=(Iterator it) const {
-	if ((_cur->key != it->key) && (_cur->data != it->data)) {
+	if (_cur != &*it) {
 		return true;
 	}
 	return false;
@@ -228,19 +236,10 @@ bool Map::insert(Elem *& root, const KEY_TYPE& key, const VALUE_TYPE& data) {
 
 
 void Map::destructCode(Elem *& root) {
-	if (size() == 0) {
-		delete root;
-	} else {
-		Elem* tempRoot = root;
-		delete root;
-		_size--;
-		if (tempRoot->left) {
-			destructCode(tempRoot->left);
-		}
-		if (tempRoot->right) {
-			destructCode(tempRoot->right);
-		}
+	while (root->left && size() != 0) {
+		erase(root->left->key);
 	}
+	delete root;
 }
 
 
