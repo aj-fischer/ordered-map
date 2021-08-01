@@ -33,7 +33,8 @@ Map::~Map() {
 	if (size() == 0) {
 		delete _root;
 	} else {
-		destructCode(_root);
+		destructCode(_root->left);
+		delete _root;
 	}
 }
 
@@ -57,6 +58,8 @@ bool Map::insert(KEY_TYPE key, VALUE_TYPE data) {
 		nodeToInsert->key = key;
 		nodeToInsert->data = data;
 		_root->left = nodeToInsert;
+		nodeToInsert->left = nullptr;
+		nodeToInsert->right = nullptr;
 		_size++;
 		return true;
 	}
@@ -213,6 +216,8 @@ bool Map::insert(Elem *& root, const KEY_TYPE& key, const VALUE_TYPE& data) {
 		nodeToInsert->key = key;
 		nodeToInsert->data = data;
 		root->left = nodeToInsert;
+		nodeToInsert->left = nullptr;
+		nodeToInsert->right = nullptr;
 		_size++;
 		return true;
 	}
@@ -225,6 +230,8 @@ bool Map::insert(Elem *& root, const KEY_TYPE& key, const VALUE_TYPE& data) {
 		nodeToInsert->key = key;
 		nodeToInsert->data = data;
 		root->right = nodeToInsert;
+		nodeToInsert->left = nullptr;
+		nodeToInsert->right = nullptr;
 		_size++;
 		return true;
 	}
@@ -236,10 +243,27 @@ bool Map::insert(Elem *& root, const KEY_TYPE& key, const VALUE_TYPE& data) {
 
 
 void Map::destructCode(Elem *& root) {
-	while (root->left && size() != 0) {
-		erase(root->left->key);
+	if (root->left && root->right) {
+		Elem* leftChild = root->left;
+		Elem* rightChild = root->right;
+		delete root;
+		_size--;
+		destructCode(leftChild);
+		destructCode(rightChild);
+	} else if (root->left) {
+		Elem* leftChild = root->left;
+		delete root;
+		_size--;
+		destructCode(leftChild);
+	} else if (root->right) {
+		Elem* rightChild = root->right;
+		delete root;
+		_size--;
+		destructCode(rightChild);
+	} else {
+		delete root;
+		_size--;
 	}
-	delete root;
 }
 
 
