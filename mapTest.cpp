@@ -35,6 +35,19 @@ TEST(MapTest, erasingExistingKeyReturnsTrueAndMapSizeDecreases) {
     EXPECT_EQ(0, m.size());
 }
 
+TEST(MapTest, erasingNodeWithTwoChildrenProperlyLinksChildren) {
+    Map m;
+    m.insert("50", "a");
+    m.insert("40", "b");
+    m.insert("60", "c");
+    m.insert("57", "d");
+    m.insert("55", "e");
+    m.insert("56", "f");
+    cout << m;
+    EXPECT_TRUE(m.erase("50"));
+    cout << m;
+}
+
 // Tests if erase() won't erase a key that doesn't exist, and that size
 // is not decremented despite failing to erase.
 TEST(MapTest, erasingInvalidKeyReturnsFalseAndMapSizeStaysSame) {
