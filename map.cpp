@@ -83,14 +83,41 @@ bool Map::erase(KEY_TYPE key) {
 			}
 			if (root->left && root->right) {
 				Elem* inorderSuccessor = root->right;
-				while (inorderSuccessor->left) {
-					inorderSuccessor = inorderSuccessor->left;
+				if (!inorderSuccessor->left) {
+					if (inorderSuccessor->right) {
+						Elem* successorChild = inorderSuccessor->right;
+						root->right = successorChild;
+					}
+					root->key = inorderSuccessor->key;
+					root->data = inorderSuccessor->data;
+					delete inorderSuccessor;
+					inorderSuccessor = nullptr;
+					_size--;
+					return true;
+				} else {
+					while (inorderSuccessor->left) {
+						inorderSuccessor = inorderSuccessor->left;
+					}
+					if (inorderSuccessor->right) {
+						Elem* childSuccessor = inorderSuccessor->right;
+						root->key =  inorderSuccessor->key;
+						root->data = inorderSuccessor->data;
+						Elem* nodeBeforeLastSuccessor = root->right;
+						while (nodeBeforeLastSuccessor->left != inorderSuccessor) {
+							nodeBeforeLastSuccessor = nodeBeforeLastSuccessor->left;
+						}
+						delete inorderSuccessor;
+						_size--;
+						nodeBeforeLastSuccessor->left = childSuccessor;
+						return true;
+					}
+					// If the inorder successor does not have a right child.
+					root->key = inorderSuccessor->key;
+					root->data = inorderSuccessor->data;
+					delete inorderSuccessor;
+					_size--;
+					return true;
 				}
-				root->key = inorderSuccessor->key;
-				root->data = inorderSuccessor->data;
-				delete inorderSuccessor;
-				_size--;
-				return true;
 			}
 			if (root->left) {
 				Elem* childNode = root->left;
