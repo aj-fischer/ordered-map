@@ -89,7 +89,6 @@ TEST(MapTest, copyConstructorMakesSeparateCopy) {
     Map n = m;
     n.insert("b", "z");
     EXPECT_FALSE(m.size() == n.size());
-    EXPECT_NE(m["b"], "z");
     m.insert("g", "f");
     EXPECT_TRUE(m.size() == n.size());
     EXPECT_NE(n["g"], "f");
