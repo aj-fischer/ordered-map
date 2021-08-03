@@ -66,11 +66,36 @@ TEST(MapTest, indexOperatorOfExistingKeyReturnsProperValueAndSizeIsSame) {
     EXPECT_EQ(m.size(), 1);
 }
 
+// Index operator should insert an element if it's not in the tree and size should increase by one.
 TEST(MapTest, indexOperatorOfInvalidKeyReturnsEmptyStringAndIncreasesSize) {
     Map m;
     m.insert("g", "z");
     EXPECT_EQ(m["b"], "");
     EXPECT_EQ(m.size(), 2);
+}
+
+// Two maps of the same size should be created from the copy constructor
+TEST(MapTest, copyConstructorMakesCorrectSize) {
+    Map m;
+    m.insert("a", "a");
+    Map n = m;
+    EXPECT_EQ(m.size(), 1);
+    EXPECT_EQ(n.size(), 1);
+}
+
+TEST(MapTest, copyConstructorMakesSeparateCopy) {
+    Map m;
+    m.insert("a", "a");
+    Map n = m;
+    n.insert("b", "z");
+    EXPECT_FALSE(m.size() == n.size());
+    EXPECT_NE(m["b"], "z");
+    m.insert("g", "f");
+    EXPECT_TRUE(m.size() == n.size());
+    EXPECT_NE(n["g"], "f");
+    m["r"] = "j";
+    n["r"] = "h";
+    EXPECT_NE(m["r"], n["r"]);
 }
 
 int main(int argc, char **argv) {
