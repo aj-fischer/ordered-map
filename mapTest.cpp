@@ -100,16 +100,14 @@ TEST(MapTest, copyConstructorMakesSeparateCopy) {
     EXPECT_FALSE(m.size() == n.size());
     m.insert("g", "f");
     EXPECT_TRUE(m.size() == n.size());
-    EXPECT_NE(n["g"], "f");
-    m["r"] = "j";
-    n["r"] = "h";
     cout << m;
     cout << n;
+    m["r"] = "j";
+    n["r"] = "h";
     EXPECT_NE(m["r"], n["r"]);
-    m.erase("a");
+    m.erase("r");
     EXPECT_NE(m.size(), n.size());
-    n.erase("g");
-    n.erase("a");
+    n.erase("r");
     EXPECT_EQ(m.size(), n.size());
 }
 

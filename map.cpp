@@ -202,7 +202,7 @@ VALUE_TYPE& Map::operator[](KEY_TYPE key) {
 	Iterator it = find(key);
 	if (((it == end()) && it->key != key) || !&*it) {
 		string str = "";
-		insert(_root->left, key, str);
+		insert(key, str);
 		Iterator newIt = find(key);
 		return newIt->data;
 	}
