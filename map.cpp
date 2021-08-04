@@ -167,11 +167,13 @@ Map::Iterator Map::find(KEY_TYPE key) const{
 			root = root->left;
 		} else if (key > root->key) {
 			root = root->right;
+		} else if (key == root->key) {
+			return Iterator(root);
 		} else {
 			break;
 		}
 	}
-	return Iterator(root);
+	return end();
 }
 
 
@@ -194,13 +196,13 @@ Map::Iterator Map::end() const{
 	while (root->right) {
 		root = root->right;
 	}
-	return Iterator(root);
+	return Iterator(root->right);
 }
 
 
 VALUE_TYPE& Map::operator[](KEY_TYPE key) {
 	Iterator it = find(key);
-	if (((it == end()) && it->key != key) || !&*it) {
+	if (it == end()) {
 		string str = "";
 		insert(key, str);
 		Iterator newIt = find(key);
