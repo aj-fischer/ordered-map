@@ -46,6 +46,15 @@ TEST(MapTest, erasingNodeWithTwoChildrenProperlyLinksChildren) {
     cout << m;
     EXPECT_TRUE(m.erase("50"));
     cout << m;
+    EXPECT_TRUE(m.erase("55"));
+    cout << m;
+    EXPECT_TRUE(m.erase("56"));
+    cout << m;
+    EXPECT_TRUE(m.erase("57"));
+    cout << m;
+    EXPECT_TRUE(m.erase("60"));
+    cout << m;
+    EXPECT_TRUE(m.erase("40"));
 }
 
 // Tests if erase() won't erase a key that doesn't exist, and that size
@@ -94,7 +103,14 @@ TEST(MapTest, copyConstructorMakesSeparateCopy) {
     EXPECT_NE(n["g"], "f");
     m["r"] = "j";
     n["r"] = "h";
+    cout << m;
+    cout << n;
     EXPECT_NE(m["r"], n["r"]);
+    m.erase("a");
+    EXPECT_NE(m.size(), n.size());
+    n.erase("g");
+    n.erase("a");
+    EXPECT_EQ(m.size(), n.size());
 }
 
 int main(int argc, char **argv) {

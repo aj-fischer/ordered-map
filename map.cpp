@@ -33,8 +33,7 @@ Map::~Map() {
 	if (size() == 0) {
 		delete _root;
 	} else {
-		destructCode(_root->left);
-		delete _root;
+		destructCode(_root);
 	}
 }
 
@@ -78,6 +77,7 @@ bool Map::erase(KEY_TYPE key) {
 		if (key == root->key) {
 			if (!root->left && !root->right) {
 				delete root;
+				_root->left = nullptr;
 				_size--;
 				return true;
 			}
@@ -91,30 +91,31 @@ bool Map::erase(KEY_TYPE key) {
 					root->key = inorderSuccessor->key;
 					root->data = inorderSuccessor->data;
 					delete inorderSuccessor;
-					inorderSuccessor = nullptr;
+					root->right = nullptr;
 					_size--;
 					return true;
 				} else {
+					Elem* parent = root->right;
+					inorderSuccessor = inorderSuccessor->left;
 					while (inorderSuccessor->left) {
 						inorderSuccessor = inorderSuccessor->left;
+						parent = parent->left;
 					}
 					if (inorderSuccessor->right) {
 						Elem* childSuccessor = inorderSuccessor->right;
 						root->key =  inorderSuccessor->key;
 						root->data = inorderSuccessor->data;
-						Elem* nodeBeforeLastSuccessor = root->right;
-						while (nodeBeforeLastSuccessor->left != inorderSuccessor) {
-							nodeBeforeLastSuccessor = nodeBeforeLastSuccessor->left;
-						}
 						delete inorderSuccessor;
+						inorderSuccessor = nullptr;
 						_size--;
-						nodeBeforeLastSuccessor->left = childSuccessor;
+						parent->left = childSuccessor;
 						return true;
 					}
 					// If the inorder successor does not have a right child.
 					root->key = inorderSuccessor->key;
 					root->data = inorderSuccessor->data;
 					delete inorderSuccessor;
+					parent->left = nullptr;
 					_size--;
 					return true;
 				}
@@ -124,6 +125,7 @@ bool Map::erase(KEY_TYPE key) {
 				root->key = childNode->key;
 				root->data = childNode->data;
 				delete childNode;
+				root->left = nullptr;
 				_size--;
 				return true;
 			}
@@ -132,6 +134,7 @@ bool Map::erase(KEY_TYPE key) {
 			root->key = childNode->key;
 			root->data = childNode->data;
 			delete childNode;
+			root->right = nullptr;
 			_size--;
 			return true;
 		}
@@ -270,27 +273,10 @@ bool Map::insert(Elem *& root, const KEY_TYPE& key, const VALUE_TYPE& data) {
 
 
 void Map::destructCode(Elem *& root) {
-	if (root->left && root->right) {
-		Elem* leftChild = root->left;
-		Elem* rightChild = root->right;
-		delete root;
-		_size--;
-		destructCode(leftChild);
-		destructCode(rightChild);
-	} else if (root->left) {
-		Elem* leftChild = root->left;
-		delete root;
-		_size--;
-		destructCode(leftChild);
-	} else if (root->right) {
-		Elem* rightChild = root->right;
-		delete root;
-		_size--;
-		destructCode(rightChild);
-	} else {
-		delete root;
-		_size--;
+	while ((root->left) && (size() != 0)) {
+		erase(root->left->key);
 	}
+	delete _root;
 }
 
 
