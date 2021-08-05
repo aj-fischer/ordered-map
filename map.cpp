@@ -71,13 +71,19 @@ bool Map::erase(KEY_TYPE key) {
 		return false;
 	}
 
+	Elem* parent = _root;
 	Elem* root = _root->left;
 
 	while (root) {
 		if (key == root->key) {
 			if (!root->left && !root->right) {
-				delete root;
-				_root->left = nullptr;
+				if (parent->left == root) {
+					delete root;
+					parent->left = nullptr;
+				} else {
+					delete root;
+					parent->right = nullptr;
+				}
 				_size--;
 				return true;
 			}
@@ -137,12 +143,14 @@ bool Map::erase(KEY_TYPE key) {
 			root->right = nullptr;
 			_size--;
 			return true;
-		}
-		if (key < root->key) {
+		} else if (key < root->key) {
+			parent = root;
 			root = root->left;
 		} else if (key > root->key) {
+			parent = root;
 			root = root->right;
-		} else {
+		}
+		else {
 			break;
 		}
 	}
