@@ -115,6 +115,46 @@ TEST(MapTest, copyConstructorMakesSeparateCopy) {
     EXPECT_EQ(m.size(), n.size());
 }
 
+// Using the assignment operator results in two maps of the same, correct size.
+TEST(MapTest, assignmentOperatorMakesCorrectSize)
+{
+    Map m;
+    EXPECT_EQ(0, m.size());
+    m.insert("a", "a");
+    m.insert("b", "b");
+    EXPECT_EQ(2, m.size());
+    Map n = m;
+    EXPECT_EQ(2, n.size());
+    EXPECT_EQ(m.size(), n.size());
+}
+
+// Using the assignment operator with an existing map makes its own
+// copy, such that if the value associated with a key is changed
+// in the copy it does not change the associated value in the
+// original, and inserts/erases on either won't affect the other.
+TEST(MapTest, assignmentMakesSeparateCopy)
+{
+    Map m;
+    m.insert("a", "a");
+    Map n;
+    n = m;
+    EXPECT_EQ(n.size(), m.size());
+    n["a"] = "b";
+    EXPECT_NE(m["a"], n["a"]);
+    m.insert("b", "a");
+    EXPECT_EQ(1, n.size());
+    EXPECT_NE(m["b"], n["b"]);
+    n.insert("b", "b");
+    EXPECT_EQ(2, n.size());
+    EXPECT_NE(m["b"], n["b"]);
+    m.erase("a");
+    EXPECT_EQ(2, n.size());
+    EXPECT_NE(m["a"], n["a"]);
+    n.erase("b");
+    EXPECT_EQ(1, n.size());
+    EXPECT_NE(m["b"], n["b"]);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

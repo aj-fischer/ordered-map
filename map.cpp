@@ -30,11 +30,7 @@ Map::Map(const Map &v){
 
 // destructor
 Map::~Map() {
-	if (size() == 0) {
-		delete _root;
-	} else {
-		destructCode(_root);
-	}
+	destructCode(_root);
 }
 
 // assignment
@@ -43,10 +39,8 @@ Map& Map::operator=(const Map &rhs) {
 		return *this;
 	}
 	destructCode(_root);
+	copyCode(_root, rhs._root);
 	_size = rhs.size();
-	if (_size == 0) {
-		copyCode(_root, rhs._root);
-	}
 	return *this;
 }
 
@@ -303,10 +297,14 @@ bool Map::insert(Elem *& root, const KEY_TYPE& key, const VALUE_TYPE& data) {
 
 
 void Map::destructCode(Elem *& root) {
-	while ((root->left) && (size() != 0)) {
-		erase(root->left->key);
+	if (size() == 0) {
+		delete root;
+	} else {
+		while ((root->left) && (size() != 0)) {
+			erase(root->left->key);
+		}
+		delete _root;
 	}
-	delete _root;
 }
 
 
