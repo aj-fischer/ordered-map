@@ -127,20 +127,29 @@ bool Map::erase(KEY_TYPE key) {
 				}
 			}
 			if (root->left) {
-				Elem* childNode = root->left;
-				root->key = childNode->key;
-				root->data = childNode->data;
-				delete childNode;
-				root->left = nullptr;
+				Elem* leftChild = root->left;
+				delete root;
+				if (parent->key > root->key) {
+					parent->left = nullptr;
+					parent->left = leftChild;
+				} else {
+					parent->right = nullptr;
+					parent->right = leftChild;
+				}
 				_size--;
 				return true;
 			}
 			// If only a right child.
-			Elem* childNode = root->right;
-			root->key = childNode->key;
-			root->data = childNode->data;
-			delete childNode;
-			root->right = nullptr;
+			Elem* rightChild = root->right;
+			delete root;
+			// Copy data to root nstead of deleting root - delete child instead
+			if (parent->key > root->key) {
+				parent->left = nullptr;
+				parent->left = rightChild;
+			} else {
+				parent->right = nullptr;
+				parent->right = rightChild;
+			}
 			_size--;
 			return true;
 		} else if (key < root->key) {
