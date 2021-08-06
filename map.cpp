@@ -78,10 +78,8 @@ bool Map::erase(KEY_TYPE key) {
 					delete root;
 					parent->right = nullptr;
 				}
-				_size--;
-				return true;
 			}
-			if (root->left && root->right) {
+			else if (root->left && root->right) {
 				Elem* inorderSuccessor = root->right;
 				if (!inorderSuccessor->left) {
 					if (inorderSuccessor->right) {
@@ -92,8 +90,6 @@ bool Map::erase(KEY_TYPE key) {
 					root->data = inorderSuccessor->data;
 					delete inorderSuccessor;
 					root->right = nullptr;
-					_size--;
-					return true;
 				} else {
 					Elem* parent = root->right;
 					inorderSuccessor = inorderSuccessor->left;
@@ -106,25 +102,28 @@ bool Map::erase(KEY_TYPE key) {
 						root->key =  inorderSuccessor->key;
 						root->data = inorderSuccessor->data;
 						delete inorderSuccessor;
-						inorderSuccessor = nullptr;
-						_size--;
 						parent->left = childSuccessor;
-						return true;
+					} else if (!inorderSuccessor->right) {
+						root->key = inorderSuccessor->key;
+						root->data = inorderSuccessor->data;
+						delete inorderSuccessor;
+						parent->left = nullptr;
+					} else {
+						break;
 					}
-					// If the inorder successor does not have a right child.
-					root->key = inorderSuccessor->key;
-					root->data = inorderSuccessor->data;
-					delete inorderSuccessor;
-					parent->left = nullptr;
-					_size--;
-					return true;
 				}
-			}
-			if (root->left) {
+			} else if (root->left) {
 				Elem* leftChild = root->left;
 				root->key = leftChild->key;
 				root->data = leftChild->data;
-				if (leftChild->left) {
+				if (leftChild->left && leftChild->right) {
+					Elem* leftTree = leftChild->left;
+					Elem* rightTree = leftChild->right;
+					delete leftChild;
+					root->left = leftTree;
+					root->right = rightTree;
+				}
+				else if (leftChild->left) {
 					Elem* leftTree = leftChild->left;
 					delete leftChild;
 					root->left = leftTree;
@@ -136,24 +135,28 @@ bool Map::erase(KEY_TYPE key) {
 					delete leftChild;
 					root->left = nullptr;
 				}
-				_size--;
-				return true;
-			}
-			// If only a right child.
-			Elem* rightChild = root->right;
-			root->key = rightChild->key;
-			root->data = rightChild->data;
-			if (rightChild->left) {
-				Elem* leftTree = rightChild->left;
-				delete rightChild;
-				root->right = leftTree;
-			} else if (rightChild->right) {
-				Elem* rightTree = rightChild->right;
-				delete rightChild;
-				root->right = rightTree;
-			} else {
-				delete rightChild;
-				root->right = nullptr;
+			} else if (root->right) {
+				Elem* rightChild = root->right;
+				root->key = rightChild->key;
+				root->data = rightChild->data;
+				if (rightChild->left && rightChild->right) {
+					Elem* leftTree = rightChild->left;
+					Elem* rightTree = rightChild->right;
+					delete rightChild;
+					root->right = rightTree;
+					root->left = leftTree;
+				} else if (rightChild->left) {
+					Elem* leftTree = rightChild->left;
+					delete rightChild;
+					root->right = leftTree;
+				} else if (rightChild->right) {
+					Elem* rightTree = rightChild->right;
+					delete rightChild;
+					root->right = rightTree;
+				} else {
+					delete rightChild;
+					root->right = nullptr;
+				}
 			}
 			_size--;
 			return true;

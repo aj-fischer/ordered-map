@@ -155,6 +155,43 @@ TEST(MapTest, assignmentMakesSeparateCopy)
     EXPECT_NE(m["b"], n["b"]);
 }
 
+// Using the assignment operator with an existing map with over 1000 items
+// makes a copy that has correct keys/values at a couple of places deep within
+// the map (values that aren't at either end of the range of keys used).
+TEST(MapTest, assignmentWithManyItemsHasCorrectValues)
+{
+    Map m;
+    string key;
+    string val;
+
+    // Add 1000 items to first map
+    for (int i = 1; i <= 1000; i++) {
+        key = to_string(i);
+        val = to_string(i);
+        m.insert(key, val);
+    }
+
+    EXPECT_EQ(1000, m.size());
+
+    Map n;
+    n = m;
+
+    EXPECT_EQ(1000, m.size());
+    EXPECT_EQ(m.size(), n.size());
+
+    // Test 10 items deep into each list
+    EXPECT_EQ(m["600"], n["600"]);
+    EXPECT_EQ(m["655"], n["655"]);
+    EXPECT_EQ(m["704"], n["704"]);
+    EXPECT_EQ(m["789"], n["789"]);
+    EXPECT_EQ(m["821"], n["821"]);
+    EXPECT_EQ(m["856"], n["856"]);
+    EXPECT_EQ(m["889"], n["889"]);
+    EXPECT_EQ(m["907"], n["907"]);
+    EXPECT_EQ(m["934"], n["934"]);
+    EXPECT_EQ(m["977"], n["977"]);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
